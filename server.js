@@ -8,7 +8,7 @@ app.use(express.static("public"))
 
 /* KẾT NỐI MONGODB */
 
-mongoose.connect("mongodb+srv://congtranvan04_db_user:tvc123zm@cluster0.qzfgsps.mongodb.net/datlichkham?retryWrites=true&w=majority")
+mongoose.connect(process.env.MONGO_URL)
 
 .then(()=>{
     console.log("MongoDB connected")
