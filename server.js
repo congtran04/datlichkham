@@ -78,7 +78,7 @@ app.get("/lich", async (req,res)=>{
 
 cron.schedule("* * * * *", async ()=>{
 
-  const today = new Date().toISOString().split("T")[0]
+  const today = new Date().toLocaleDateString("en-CA")
 
   const list = await Appointment.find({
     date:today,
