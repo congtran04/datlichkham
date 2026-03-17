@@ -76,7 +76,7 @@ app.get("/lich", async (req,res)=>{
 
 /* CRON JOB KIỂM TRA LỊCH */
 
-cron.schedule("0 * * * *", async ()=>{
+cron.schedule("* * * * *", async ()=>{
 
   const today = new Date().toISOString().split("T")[0]
 
