@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Nhắc lịch khám</title>
+</head>
+
+<body>
+
+<h2>Đặt lịch khám</h2>
+
+<input id="name" placeholder="Tên bệnh nhân">
+<br><br>
+
+<input id="phone" placeholder="Số điện thoại">
+<br><br>
+
+<input id="date" type="date">
+<br><br>
+
+<button onclick="datLich()">Đặt lịch</button>
+
+<script>
+
+async function datLich(){
+
+let name = document.getElementById("name").value
+let phone = document.getElementById("phone").value
+let date = document.getElementById("date").value
+
+await fetch("/dat-lich",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+name,
+phone,
+date
+})
+})
+
+alert("Đặt lịch thành công")
+
+}
+
+</script>
+
+</body>
+</html>
