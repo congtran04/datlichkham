@@ -16,10 +16,10 @@ mongoose.connect(process.env.MONGO_URL)
   console.log("MongoDB connected")
 })
 .catch(err=>{
-  console.log(err)
+  console.log("Mongo lỗi:", err)
 })
 
-/* MODEL LỊCH KHÁM */
+/* MODEL */
 
 const Appointment = mongoose.model("Appointment",{
   name:String,
@@ -29,7 +29,7 @@ const Appointment = mongoose.model("Appointment",{
   reminded:{type:Boolean,default:false}
 })
 
-/* CẤU HÌNH EMAIL */
+/* EMAIL */
 
 const transporter = nodemailer.createTransport({
   service:"gmail",
@@ -39,13 +39,34 @@ const transporter = nodemailer.createTransport({
   }
 })
 
-/* API ĐẶT LỊCH */
+/* TEST MAIL (debug nhanh) */
+
+app.get("/test-mail", async (req,res)=>{
+  try{
+    await transporter.sendMail({
+      from:process.env.EMAIL_USER,
+      to:process.env.EMAIL_USER,
+      subject:"Test mail",
+      text:"Nếu thấy mail này là OK"
+    })
+    res.send("Gửi mail OK")
+  }catch(err){
+    console.log("Lỗi test mail:", err)
+    res.send("Gửi mail lỗi")
+  }
+})
+
+/* ĐẶT LỊCH */
 
 app.post("/dat-lich", async (req,res)=>{
 
   try{
 
     const {name,phone,email,date} = req.body
+
+    if(!email){
+      return res.json({message:"Thiếu email"})
+    }
 
     await Appointment.create({
       name,
@@ -58,13 +79,14 @@ app.post("/dat-lich", async (req,res)=>{
 
   }catch(err){
 
+    console.log(err)
     res.status(500).json({error:"Lỗi server"})
 
   }
 
 })
 
-/* API XEM LỊCH */
+/* XEM LỊCH */
 
 app.get("/lich", async (req,res)=>{
 
@@ -74,18 +96,28 @@ app.get("/lich", async (req,res)=>{
 
 })
 
-/* CRON JOB KIỂM TRA LỊCH */
+/* CRON */
 
 cron.schedule("* * * * *", async ()=>{
 
+  console.log("=== CRON RUN ===")
+
   const today = new Date().toLocaleDateString("en-CA")
+  console.log("Today:", today)
 
   const list = await Appointment.find({
     date:today,
     reminded:false
   })
 
+  console.log("List:", list)
+
   for(const a of list){
+
+    if(!a.email){
+      console.log("Bỏ qua vì thiếu email:", a)
+      continue
+    }
 
     try{
 
@@ -99,11 +131,11 @@ cron.schedule("* * * * *", async ()=>{
       a.reminded=true
       await a.save()
 
-      console.log("Đã gửi email cho",a.email)
+      console.log("ĐÃ GỬI:", a.email)
 
     }catch(err){
 
-      console.log("Lỗi gửi email",err)
+      console.log("LỖI GỬI:", err)
 
     }
 
