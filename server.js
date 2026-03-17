@@ -1,16 +1,37 @@
 const express = require("express")
+const mongoose = require("mongoose")
+
 const app = express()
 
 app.use(express.json())
 app.use(express.static("public"))
 
-let appointments = []
+/* KẾT NỐI MONGODB */
 
-app.post("/dat-lich", (req,res)=>{
+mongoose.connect("mongodb+srv://congtranvan04_db_user:tvc123zm@cluster0.qzfgsps.mongodb.net/datlichkham?retryWrites=true&w=majority")
+
+.then(()=>{
+    console.log("MongoDB connected")
+})
+.catch(err=>{
+    console.log(err)
+})
+
+/* MODEL LỊCH KHÁM */
+
+const Appointment = mongoose.model("Appointment",{
+    name:String,
+    phone:String,
+    date:String
+})
+
+/* API ĐẶT LỊCH */
+
+app.post("/dat-lich", async (req,res)=>{
 
     const {name, phone, date} = req.body
 
-    appointments.push({
+    await Appointment.create({
         name,
         phone,
         date
@@ -22,10 +43,16 @@ app.post("/dat-lich", (req,res)=>{
 
 })
 
-app.get("/lich", (req,res)=>{
-    res.json(appointments)
+/* API LẤY DANH SÁCH LỊCH */
+
+app.get("/lich", async (req,res)=>{
+
+    const list = await Appointment.find()
+
+    res.json(list)
+
 })
 
 app.listen(3000,()=>{
-    console.log("Server chạy tại http://localhost:3000")
+    console.log("Server chạy")
 })
